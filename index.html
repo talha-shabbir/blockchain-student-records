@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blockchain Student Records</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      color: #38bdf8;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #94a3b8;
+      margin-bottom: 40px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid #334155;
+    }
+
+    .card h2 {
+      color: #38bdf8;
+      margin-bottom: 16px;
+      font-size: 1.2rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    input {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      width: 100%;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #38bdf8;
+    }
+
+    input::placeholder { color: #475569; }
+
+    .btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: #38bdf8; color: #0f172a; }
+    .btn-success { background: #22c55e; color: #0f172a; }
+    .btn-danger { background: #ef4444; color: white; }
+
+    .buttons-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .alert-success { background: #166534; color: #86efac; }
+    .alert-danger { background: #7f1d1d; color: #fca5a5; }
+
+    .chain-container { display: flex; flex-direction: column; gap: 12px; }
+
+    .block-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .block-card.genesis { border-color: #38bdf8; }
+    .block-card.tampered { border-color: #ef4444; background: #1a0a0a; }
+
+    .block-index {
+      font-size: 0.75rem;
+      color: #38bdf8;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .block-data {
+      font-size: 1rem;
+      color: #e2e8f0;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .block-hash {
+      font-size: 0.7rem;
+      color: #475569;
+      word-break: break-all;
+      margin-bottom: 4px;
+    }
+
+    .hash-label {
+      color: #64748b;
+      font-size: 0.7rem;
+    }
+
+    .arrow {
+      text-align: center;
+      color: #334155;
+      font-size: 1.5rem;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .badge-valid { background: #166534; color: #86efac; }
+    .badge-invalid { background: #7f1d1d; color: #fca5a5; }
+
+    #validationResult { margin-top: 16px; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔗 Blockchain Student Records</h1>
+    <p class="subtitle">Secure. Tamper-proof. Transparent.</p>
+
+    <!-- Add Record -->
+    <div class="card">
+      <h2>📋 Add Student Record</h2>
+      <div class="form-grid">
+        <input type="text" id="name" placeholder="Student Name" />
+        <input type="text" id="student_id" placeholder="Student ID (e.g. CS-101)" />
+        <input type="text" id="grade" placeholder="Grade (e.g. A+)" />
+        <input type="number" id="marks" placeholder="Marks (e.g. 95)" />
+      </div>
+      <button class="btn btn-primary" onclick="addRecord()">Add Record to Blockchain</button>
+      <div class="alert alert-success" id="addSuccess"></div>
+      <div class="alert alert-danger" id="addError"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card">
+      <h2>🔐 Security Actions</h2>
+      <div class="buttons-row">
+        <button class="btn btn-success" onclick="validateChain()">✅ Check Integrity</button>
+        <button class="btn btn-danger" onclick="simulateTamper()">⚠️ Simulate Tampering</button>
+        <button class="btn btn-primary" onclick="loadChain()">🔄 Refresh Chain</button>
+      </div>
+      <div id="validationResult"></div>
+    </div>
+
+    <!-- Blockchain Display -->
+    <div class="card">
+      <h2>⛓️ Blockchain</h2>
+      <div class="chain-container" id="chainContainer">
+        <p style="color:#475569">No blocks yet. Add a student record above.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "http://127.0.0.1:5000";
+
+    async function addRecord() {
+      const name = document.getElementById("name").value;
+      const student_id = document.getElementById("student_id").value;
+      const grade = document.getElementById("grade").value;
+      const marks = document.getElementById("marks").value;
+
+      if (!name || !student_id || !grade || !marks) {
+        showAlert("addError", "Please fill in all fields.");
+        return;
+      }
+
+      const res = await fetch(`${API}/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, student_id, grade, marks: parseInt(marks) })
+      });
+
+      const data = await res.json();
+      showAlert("addSuccess", data.message);
+      document.getElementById("name").value = "";
+      document.getElementById("student_id").value = "";
+      document.getElementById("grade").value = "";
+      document.getElementById("marks").value = "";
+      loadChain();
+    }
+
+    async function loadChain() {
+      const res = await fetch(`${API}/chain`);
+      const chain = await res.json();
+      const container = document.getElementById("chainContainer");
+      container.innerHTML = "";
+
+      chain.forEach((block, i) => {
+        if (i > 0) {
+          const arrow = document.createElement("div");
+          arrow.className = "arrow";
+          arrow.textContent = "↑";
+          container.appendChild(arrow);
+        }
+
+        const isGenesis = block.index === 0;
+        const div = document.createElement("div");
+        div.className = `block-card ${isGenesis ? "genesis" : ""}`;
+
+        const dataText = isGenesis
+          ? "Genesis Block"
+          : `${block.data.name} | ${block.data.student_id} | Grade: ${block.data.grade} | Marks: ${block.data.marks}`;
+
+        div.innerHTML = `
+          <div class="block-index">Block #${block.index} ${isGenesis ? "— Genesis" : ""}</div>
+          <div class="block-data">${dataText}</div>
+          <div class="block-hash"><span class="hash-label">Hash: </span>${block.hash}</div>
+          <div class="block-hash"><span class="hash-label">Prev: </span>${block.previous_hash}</div>
+          <div style="margin-top:8px">
+            <span class="status-badge badge-valid">✓ Linked</span>
+            ${block.index > 0 ? `<span style="font-size:0.7rem;color:#475569;margin-left:8px">${block.timestamp}</span>` : ""}
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function validateChain() {
+      const res = await fetch(`${API}/validate`);
+      const data = await res.json();
+      const result = document.getElementById("validationResult");
+      if (data.valid) {
+        result.innerHTML = `<span class="status-badge badge-valid">✅ Blockchain is valid — All records are secure</span>`;
+      } else {
+        result.innerHTML = `<span class="status-badge badge-invalid">❌ Tampering detected — Chain is compromised!</span>`;
+        highlightTamperedBlocks();
+      }
+    }
+
+    async function simulateTamper() {
+      const res = await fetch(`${API}/chain`);
+      const chain = await res.json();
+      const studentBlocks = chain.filter(b => b.index > 0);
+
+      if (studentBlocks.length === 0) {
+        alert("Add at least one student record first!");
+        return;
+      }
+
+      const target = studentBlocks[0];
+      await fetch(`${API}/tamper/${target.index}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: target.data.name,
+          student_id: target.data.student_id,
+          grade: "A+",
+          marks: 99
+        })
+      });
+
+      highlightTamperedBlocks();
+      const result = document.getElementById("validationResult");
+      result.innerHTML = `<span class="status-badge badge-invalid">⚠️ Record tampered! Click Check Integrity to verify.</span>`;
+    }
+
+    function highlightTamperedBlocks() {
+      const blocks = document.querySelectorAll(".block-card:not(.genesis)");
+      if (blocks.length > 0) {
+        blocks[0].classList.add("tampered");
+      }
+    }
+
+    function showAlert(id, message) {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.style.display = "block";
+      setTimeout(() => el.style.display = "none", 3000);
+    }
+
+    loadChain();
+  </script>
+</body>
+</html>
