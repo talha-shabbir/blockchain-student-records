@@ -273,6 +273,7 @@
       const result = document.getElementById("validationResult");
       if (data.valid) {
         result.innerHTML = `<span class="status-badge badge-valid">✅ Blockchain is valid — All records are secure</span>`;
+        clearTamperedHighlights();
       } else {
         result.innerHTML = `<span class="status-badge badge-invalid">❌ Tampering detected — Chain is compromised!</span>`;
         highlightTamperedBlocks();
@@ -310,7 +311,24 @@
       const blocks = document.querySelectorAll(".block-card:not(.genesis)");
       if (blocks.length > 0) {
         blocks[0].classList.add("tampered");
+        const badge = blocks[0].querySelector(".status-badge");
+        if (badge) {
+          badge.className = "status-badge badge-invalid";
+          badge.textContent = "✗ Tampered";
+        }
       }
+    }
+
+    function clearTamperedHighlights() {
+      const blocks = document.querySelectorAll(".block-card");
+      blocks.forEach(block => {
+        block.classList.remove("tampered");
+        const badge = block.querySelector(".status-badge");
+        if (badge) {
+          badge.className = "status-badge badge-valid";
+          badge.textContent = "✓ Linked";
+        }
+      });
     }
 
     function showAlert(id, message) {
