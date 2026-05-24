@@ -232,40 +232,48 @@
     }
 
     async function loadChain() {
-      const res = await fetch(`${API}/chain`);
-      const chain = await res.json();
-      const container = document.getElementById("chainContainer");
-      container.innerHTML = "";
+  const res = await fetch(`${API}/chain`);
+  const chain = await res.json();
+  const container = document.getElementById("chainContainer");
+  container.innerHTML = "";
 
-      chain.forEach((block, i) => {
-        if (i > 0) {
-          const arrow = document.createElement("div");
-          arrow.className = "arrow";
-          arrow.textContent = "↑";
-          container.appendChild(arrow);
-        }
-
-        const isGenesis = block.index === 0;
-        const div = document.createElement("div");
-        div.className = `block-card ${isGenesis ? "genesis" : ""}`;
-
-        const dataText = isGenesis
-          ? "Genesis Block"
-          : `${block.data.name} | ${block.data.student_id} | Grade: ${block.data.grade} | Marks: ${block.data.marks}`;
-
-        div.innerHTML = `
-          <div class="block-index">Block #${block.index} ${isGenesis ? "— Genesis" : ""}</div>
-          <div class="block-data">${dataText}</div>
-          <div class="block-hash"><span class="hash-label">Hash: </span>${block.hash}</div>
-          <div class="block-hash"><span class="hash-label">Prev: </span>${block.previous_hash}</div>
-          <div style="margin-top:8px">
-            <span class="status-badge badge-valid">✓ Linked</span>
-            ${block.index > 0 ? `<span style="font-size:0.7rem;color:#475569;margin-left:8px">${block.timestamp}</span>` : ""}
-          </div>
-        `;
-        container.appendChild(div);
-      });
+  chain.forEach((block, i) => {
+    if (i > 0) {
+      const arrow = document.createElement("div");
+      arrow.className = "arrow";
+      arrow.textContent = "↑";
+      container.appendChild(arrow);
     }
+
+    const isGenesis = block.index === 0;
+    const div = document.createElement("div");
+    div.className = `block-card ${isGenesis ? "genesis" : ""}`;
+    div.dataset.index = block.index;
+
+    const dataText = isGenesis
+      ? "Genesis Block"
+      : `${block.data.name} | ${block.data.student_id} | Grade: ${block.data.grade} | Marks: ${block.data.marks}`;
+
+    div.innerHTML = `
+      <div class="block-index">Block #${block.index} ${isGenesis ? "— Genesis" : ""}</div>
+      <div class="block-data">${dataText}</div>
+      <div class="block-hash"><span class="hash-label">Hash: </span>${block.hash}</div>
+      <div class="block-hash"><span class="hash-label">Prev: </span>${block.previous_hash}</div>
+      <div style="margin-top:8px">
+        <span class="status-badge badge-valid">✓ Linked</span>
+        ${block.index > 0 ? `<span style="font-size:0.7rem;color:#475569;margin-left:8px">${block.timestamp}</span>` : ""}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Auto check integrity after every load so tampered state stays visible
+  const valRes = await fetch(`${API}/validate`);
+  const valData = await valRes.json();
+  if (!valData.valid) {
+    highlightTamperedBlocks();
+  }
+}
 
     async function validateChain() {
       const res = await fetch(`${API}/validate`);
